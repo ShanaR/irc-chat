@@ -1,7 +1,19 @@
 import os
 import uuid
-from flask import Flask, session
+from flask import Flask, session, render_template, request, redirect, url_for
 from flask.ext.socketio import SocketIO, emit
+
+import psycopg2
+import psycopg2.extras
+
+import utils
+
+def connectToDB():
+  connectionString = 'dbname=chat user=postgres password=Wtr15! host=localhost'
+  try:
+    return psycopg2.connect(connectionString)
+  except:
+    print("Can't connect to database")
 
 app = Flask(__name__, static_url_path='')
 app.config['SECRET_KEY'] = 'secret!'
@@ -32,16 +44,33 @@ def test_connect():
     users[session['uuid']]={'username':'New User'}
     updateRoster()
 
-
     for message in messages:
         emit('message', message)
 
 @socketio.on('message', namespace='/chat')
 def new_message(message):
     #tmp = {'text':message, 'name':'testName'}
-    tmp = {'text':message, 'name':users[session['uuid']]['username']}
-    messages.append(tmp)
-    emit('message', tmp, broadcast=True)
+    #tmp = {'text':message, 'name':users[session['uuid']]['username']}
+    conn = connectToDB()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    # add new entry into database
+    try:
+      cur.execute("""INSERT INTO msg (message, user_id) 
+       VALUES (%s, %s, %s);""",
+       (message, 1) )
+    except:
+      print("ERROR inserting into messages")
+    conn.commit()
+  
+    """rows returned from postgres are just an ordered list"""
+    try:
+        cur.execute("select message from msg")
+    except:
+        print("Error executing select")
+    results = cur.fetchall()
+    messages.append(results)
+    emit('message', results, broadcast=True)
     
 @socketio.on('identify', namespace='/chat')
 def on_identify(message):
@@ -51,11 +80,29 @@ def on_identify(message):
 
 
 @socketio.on('login', namespace='/chat')
-def on_login(pw):
+def on_login(pw, uname):
     print 'login '  + pw
-    #users[session['uuid']]={'username':message}
-    #updateRoster()
-
+    
+    
+    conn = connectToDB()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    username = uname
+    try:
+        query = "SELECT * FROM users WHERE username = '%s' AND password = '%s'" % (username, pw)
+        print query
+        print cur.execute(query)
+        print 'OK'
+        if cur.fetchone():
+            print 'query worked'
+            actualUser=True
+        else:
+            print 'query did not work'
+            actualUser=False
+        
+        emit('login', actualUser, broadcast=True)
+    except:
+        print("Incorrect login.  Please try again.")
 
     
 @socketio.on('disconnect', namespace='/chat')

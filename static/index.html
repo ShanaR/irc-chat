@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en" ng-app>
   <head>
-    <title>Chat Example</title>
+    <title>Let's Chat</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/bootstrap-responsive.min.css">
@@ -12,18 +12,17 @@
 
 #popupbox{
 margin: 0; 
-margin-left: 10%; 
+margin-left: -5%; 
 margin-right: 70%;
-margin-top: 70px; 
-padding-top: 10px; 
-width: 20%; 
-height: 170px; 
+width: 70%; 
+height: 30%; 
 position: absolute; 
-background: #FFFFFF; 
+background: #b5c9be; 
 border: solid #909090 2px; 
 z-index: 9; 
 font-family: arial; 
-visibility: hidden; 
+visibility: hidden;
+color: #db6046;
 }
 </style>
 <script language="JavaScript" type="text/javascript">
@@ -62,6 +61,14 @@ if(showhide == "show"){
           $scope.roster = names;
           $scope.$apply();
         });
+        
+        socket.on('login', function (actualUser){
+          console.log(actualUser)
+          $scope.processLogin()
+          $scope.$apply()
+        }
+        
+        )
 
         $scope.send = function send() {
           console.log('Sending message:', $scope.text);
@@ -82,7 +89,7 @@ if(showhide == "show"){
         $scope.processLogin = function processLogin() {
           console.log("Trying to log in");
           login('hide');
-          socket.emit('login', $scope.password);
+          socket.emit('login', $scope.password, $scope.name2);
         };
 
 
@@ -102,12 +109,15 @@ if(showhide == "show"){
       
       
           <div id="popupbox"> 
+          <img src="img/LetsChatLogo.png" />
+          <!--Dr. Zacharski, In talking with Tyler Weisbach, I liked his idea for making the login box larger to cover the messages. I did not copy his code, only used his idea to make the login box larger.  Thank you. -->
+          <br />
 <form ng-submit="processLogin()">
 <center>Username:</center>
 <center><input type="text"  ng-model="name2" ng-change="setName2()" placeholder="Username" size="14" /></center>
 <center>Password:</center>
 <center><input  ng-model="password" type="password" size="14" /></center>
-<center><input type="submit" class="span1 btn btn-primary" value="Send" ng-disabled="!password"></center>
+<center><input type="submit" class="span1 btn btn-primary" value="Login" ng-disabled="!password"></center>
 
 </form>
 <br />
@@ -130,7 +140,7 @@ if(showhide == "show"){
         </div>
       </div>
       <div class="page-header">
-        <h1>Chat Example</h1>
+        <img src="img/LetsChatLogo.png" />
       </div>
       <div class="row">
         <div class="span3">
