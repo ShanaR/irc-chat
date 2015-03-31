@@ -118,6 +118,20 @@ ALTER TABLE ONLY users ALTER COLUMN uid SET DEFAULT nextval('users_uid_seq'::reg
 --
 
 COPY msgs (msgid, message, user_id) FROM stdin;
+1	test message	1
+2	Let test this	1
+3	test message again	1
+4	this is a test	1
+5	message again	1
+6	Test me again	1
+7	cool t-shirts	1
+8	I want to show this message	1
+9	hydrangeas are beautiful this time of year	\N
+10	Is the tulip red?	2
+11	just work	2
+12	Do you remember forgetmenots?	2
+13	fresh over the fire	3
+14	try me	1
 \.
 
 
@@ -125,7 +139,7 @@ COPY msgs (msgid, message, user_id) FROM stdin;
 -- Name: msgs_msgid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('msgs_msgid_seq', 1, false);
+SELECT pg_catalog.setval('msgs_msgid_seq', 14, true);
 
 
 --
